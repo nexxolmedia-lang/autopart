@@ -1,0 +1,57 @@
+# Complete AutoPart stack: PostgreSQL → migrations → app.
+#
+#   cp .env.example .env.docker   # then edit the values marked CHANGE ME
+#   docker compose --env-file .env.docker up -d --build
+#
+# Demo data (wipes the database!) can be loaded once with:
+#   docker compose --env-file .env.docker run --rm -e ALLOW_DEMO_SEED=true migrate npx prisma db seed
+#
+# Put a TLS-terminating reverse proxy (Caddy, nginx, a cloud load balancer) in
+# front of port 3000: session cookies are Secure-only in production.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: autopart
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: autopart
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autopart -d autopart"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://autopart:${POSTGRES_PASSWORD}@db:5432/autopart?schema=public
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://autopart:${POSTGRES_PASSWORD}@db:5432/autopart?schema=public
+      APP_URL: ${APP_URL:?set APP_URL}
+      DEMO_MODE: ${DEMO_MODE:-false}
+    ports:
+      - "3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

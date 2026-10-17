@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────────────────
+   AutoPart design tokens
+   Charcoal + bone + machined steel, with a single "ember" accent used for
+   intent (primary actions, focus, live indicators) — never for decoration.
+   ────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Arial carries Persian glyphs on Windows and macOS; Android/Linux fall back to
+     Noto Sans Arabic / Tahoma, which share Arial's proportions. */
+  --font-sans: Arial, "Noto Sans Arabic", Tahoma, "Segoe UI", sans-serif;
+  --font-display: Arial, "Noto Sans Arabic", Tahoma, sans-serif;
+  --font-mono: Arial, "Noto Sans Arabic", Tahoma, sans-serif;
+
+  --color-ink: #0c0d0f;
+  --color-ink-2: #141619;
+  --color-ink-3: #1c1f23;
+  --color-graphite: #2a2e33;
+  --color-steel-800: #3a3f46;
+  --color-steel-700: #4d535b;
+  --color-steel-600: #646b74;
+  --color-steel-500: #7d848d;
+  --color-steel-400: #9ba1a9;
+  --color-steel-300: #c2c6cc;
+  --color-steel-200: #dcdee1;
+  --color-steel-100: #ebecee;
+  --color-bone: #f2f0eb;
+  --color-bone-2: #e9e6df;
+  --color-paper: #faf9f6;
+  --color-line: #dfdbd2;
+  --color-line-dark: #2c3035;
+
+  --color-ember: #ff5b1a;
+  --color-ember-600: #e84a0c;
+  --color-ember-700: #c03b06;
+  --color-ember-100: #ffe3d6;
+  --color-ember-50: #fff3ec;
+
+  --color-ok: #17804f;
+  --color-ok-50: #e7f4ec;
+  --color-info: #2563a8;
+  --color-info-50: #e8f0fa;
+  --color-warn: #a86108;
+  --color-warn-50: #fbf1e1;
+  --color-danger: #b4232a;
+  --color-danger-50: #fbe9ea;
+
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+
+  --shadow-hairline: 0 0 0 1px var(--color-line);
+  --shadow-lift: 0 1px 0 rgba(12, 13, 15, 0.04), 0 8px 24px -12px rgba(12, 13, 15, 0.18);
+  --shadow-float: 0 24px 48px -24px rgba(12, 13, 15, 0.35);
+
+  --ease-precise: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --animate-draw: draw 2.4s var(--ease-precise) forwards;
+  --animate-rise: rise 0.7s var(--ease-precise) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -400px 0;
+    }
+    to {
+      background-position: 400px 0;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  ::selection {
+    background: var(--color-ember);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+  dialog::backdrop {
+    background: rgba(12, 13, 15, 0.55);
+    backdrop-filter: blur(2px);
+  }
+}
+
+@layer components {
+  /* Persian typography: bold Arial display type. No letter-spacing — tracking
+     breaks the joined letterforms of the Persian script. */
+  .type-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .type-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .type-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .type-data {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Latin identifiers (SKUs, order numbers, phones, emails) inside RTL text. */
+  .ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Engineering-drawing grid used on dark surfaces. */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .paper-grid {
+    background-image:
+      linear-gradient(to right, rgba(12, 13, 15, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(12, 13, 15, 0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .hairline-t {
+    box-shadow: inset 0 1px 0 var(--color-line);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-steel-100) 0px, var(--color-bone) 120px, var(--color-steel-100) 240px);
+    background-size: 800px 100%;
+    animation: var(--animate-shimmer);
+    border-radius: var(--radius-xs);
+  }
+
+  .draw-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: var(--animate-draw);
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.35s var(--ease-precise);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .draw-path {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}

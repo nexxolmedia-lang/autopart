@@ -1,0 +1,510 @@
+// AutoPart — relational data model
+//
+// Conventions
+// - Money is stored as whole Iranian rials (IRR has no minor unit in practice) in
+//   BIGINT columns; the Prisma client maps them to JS numbers (safe to 9e15 rials).
+// - Discounts are stored in basis points (1 bp = 0.01 %).
+// - Business records are archived, never hard-deleted, once anything references them.
+// - Inventory invariants (non-negative stock, reserved <= on hand) are enforced by
+//   CHECK constraints in the migration as a last line of defence.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity & access
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Role {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  name        String
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       User[]
+}
+
+model Permission {
+  key         String           @id
+  group       String
+  description String
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId        String
+  permissionKey String
+  role          Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission    Permission @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+
+  @@id([roleId, permissionKey])
+  @@index([permissionKey])
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String
+  phone             String?
+  passwordHash      String
+  roleId            String
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  role                Role                 @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  sessions            Session[]
+  customerAssignments CustomerAssignment[] @relation("AssignedVisitor")
+  assignmentsMade     CustomerAssignment[] @relation("AssignedBy")
+  customersCreated    Customer[]           @relation("CustomerCreatedBy")
+  ordersCreated       Order[]              @relation("OrderVisitor")
+  ordersApproved      Order[]              @relation("OrderApprover")
+  statusEvents        OrderStatusEvent[]
+  orderNotes          OrderNote[]
+  movements           InventoryMovement[]
+  auditLogs           AuditLog[]
+  notifications       Notification[]
+  imagesUploaded      ImageAsset[]
+  itemsPicked         OrderItem[]          @relation("ItemPickedBy")
+
+  @@index([roleId])
+  @@index([isActive])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ipAddress String?
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Customers
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Customer {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  businessName String
+  contactName  String?
+  phone        String?
+  email        String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  region       String?
+  postalCode   String?
+  notes        String?
+  isActive     Boolean  @default(true)
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  createdBy   User?                @relation("CustomerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  assignments CustomerAssignment[]
+  orders      Order[]
+
+  @@index([businessName])
+  @@index([isActive])
+}
+
+model CustomerAssignment {
+  customerId   String
+  userId       String
+  assignedAt   DateTime @default(now())
+  assignedById String?
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user       User     @relation("AssignedVisitor", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy User?    @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@id([customerId, userId])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Catalogue
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  name         String
+  description  String?
+  illustration String    @default("generic")
+  sortOrder    Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     Product[]
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  country     String?
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id                String        @id @default(cuid())
+  sku               String        @unique
+  slug              String        @unique
+  name              String
+  shortDescription  String?
+  description       String
+  categoryId        String
+  brandId           String
+  price             BigInt
+  oeReferences      String[]      @default([])
+  /// Array of { label: string, value: string }
+  specs             Json          @default("[]")
+  weightGrams       Int?
+  status            ProductStatus @default(ACTIVE)
+  isFeatured        Boolean       @default(false)
+  lowStockThreshold Int           @default(5)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  archivedAt        DateTime?
+
+  category     Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  brand        Brand               @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  images       ProductImage[]
+  fitments     VehicleFitment[]
+  inventory    Inventory?
+  movements    InventoryMovement[]
+  orderItems   OrderItem[]
+  reservations StockReservation[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([status])
+  @@index([isFeatured])
+}
+
+model ImageAsset {
+  id            String         @id @default(cuid())
+  mimeType      String
+  byteSize      Int
+  sha256        String
+  data          Bytes
+  createdById   String?
+  createdAt     DateTime       @default(now())
+  createdBy     User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  productImages ProductImage[]
+}
+
+model ProductImage {
+  id        String      @id @default(cuid())
+  productId String
+  /// Static asset path (e.g. bundled technical illustrations) — mutually exclusive with assetId
+  url       String?
+  assetId   String?
+  alt       String
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  asset     ImageAsset? @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+}
+
+model VehicleFitment {
+  id        String  @id @default(cuid())
+  productId String
+  make      String
+  model     String
+  yearFrom  Int
+  yearTo    Int?
+  engine    String?
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([make, model])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inventory
+//   available = onHand - reserved
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Inventory {
+  productId   String   @id
+  onHand      Int      @default(0)
+  reserved    Int      @default(0)
+  binLocation String?
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+enum MovementType {
+  RECEIPT
+  ADJUSTMENT
+  STOCK_COUNT
+  DISPATCH
+  RETURN
+}
+
+model InventoryMovement {
+  id             String       @id @default(cuid())
+  productId      String
+  type           MovementType
+  quantityBefore Int
+  quantityChange Int
+  quantityAfter  Int
+  reason         String
+  reference      String?
+  orderId        String?
+  userId         String?
+  createdAt      DateTime     @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  order   Order?  @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([productId, createdAt])
+  @@index([createdAt])
+  @@index([orderId])
+}
+
+enum ReservationStatus {
+  ACTIVE
+  RELEASED
+  CONSUMED
+}
+
+model StockReservation {
+  id          String            @id @default(cuid())
+  orderId     String
+  orderItemId String            @unique
+  productId   String
+  quantity    Int
+  status      ReservationStatus @default(ACTIVE)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  releasedAt  DateTime?
+  consumedAt  DateTime?
+
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId, status])
+  @@index([orderId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Orders
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum OrderStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PREPARING
+  READY_FOR_DISPATCH
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryWindow {
+  ANY
+  MORNING
+  AFTERNOON
+}
+
+model Order {
+  id                      String          @id @default(cuid())
+  number                  Int             @unique @default(autoincrement())
+  status                  OrderStatus     @default(DRAFT)
+  customerId              String
+  visitorId               String
+  /// Snapshot of the customer at submission — keeps history readable after edits.
+  customerName            String
+  deliveryAddress         String
+  currency                String          @default("IRR")
+  subtotal                BigInt          @default(0)
+  discountAmount          BigInt          @default(0)
+  total                   BigInt          @default(0)
+  visitorNote             String?
+  requestedDeliveryDate   DateTime?       @db.Date
+  requestedDeliveryWindow DeliveryWindow  @default(ANY)
+  confirmedDeliveryDate   DateTime?       @db.Date
+  confirmedDeliveryWindow DeliveryWindow?
+  rejectionReason         String?
+  cancellationReason      String?
+  dispatchCarrier         String?
+  dispatchReference       String?
+  idempotencyKey          String?         @unique
+  version                 Int             @default(0)
+  submittedAt             DateTime?
+  approvedAt              DateTime?
+  approvedById            String?
+  dispatchedAt            DateTime?
+  deliveredAt             DateTime?
+  closedAt                DateTime?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  customer     Customer            @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  visitor      User                @relation("OrderVisitor", fields: [visitorId], references: [id], onDelete: Restrict)
+  approvedBy   User?               @relation("OrderApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  items        OrderItem[]
+  statusEvents OrderStatusEvent[]
+  notes        OrderNote[]
+  reservations StockReservation[]
+  movements    InventoryMovement[]
+
+  @@index([status, createdAt])
+  @@index([visitorId, createdAt])
+  @@index([customerId, createdAt])
+  @@index([submittedAt])
+}
+
+model OrderItem {
+  id                 String    @id @default(cuid())
+  orderId            String
+  productId          String
+  /// Snapshots taken when the line was priced — never recalculated from the live catalogue.
+  productName        String
+  sku                String
+  brandName          String
+  /// What the visitor submitted.
+  requestedQuantity  Int
+  requestedUnitPrice BigInt
+  /// Final (approved) values — differ from the requested values when a manager adjusts the line.
+  quantity           Int
+  unitPrice          BigInt
+  discountBps        Int       @default(0)
+  lineTotal          BigInt
+  pickedAt           DateTime?
+  pickedById         String?
+  sortOrder          Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  order       Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Restrict)
+  pickedBy    User?             @relation("ItemPickedBy", fields: [pickedById], references: [id], onDelete: SetNull)
+  reservation StockReservation?
+
+  @@unique([orderId, productId])
+  @@index([productId])
+}
+
+model OrderStatusEvent {
+  id         String       @id @default(cuid())
+  orderId    String
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  actorId    String?
+  note       String?
+  createdAt  DateTime     @default(now())
+  order      Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  actor      User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+}
+
+model OrderNote {
+  id        String   @id @default(cuid())
+  orderId   String
+  authorId  String?
+  body      String
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-cutting: audit, notifications, inbound enquiries
+// ─────────────────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  summary    String
+  changes    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model ContactInquiry {
+  id        String    @id @default(cuid())
+  name      String
+  company   String?
+  email     String
+  phone     String?
+  topic     String
+  message   String
+  ipAddress String?
+  handledAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+}
