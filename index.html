@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="fa-IR" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اتوپارت — نمونه‌کار</title>
+<meta name="description" content="اتوپارت: سامانه یکپارچه توزیع قطعات خودرو — وب‌سایت، اپلیکیشن موبایل ویزیتور، میز سفارش و پنل انبار.">
+<style>
+  :root { --ink:#0c0d0f; --bone:#f2f0eb; --paper:#faf9f6; --line:#e3e0d8; --steel:#5d6470; --ember:#ff5b1a; --ember-d:#c03b06; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family: Arial, "Noto Sans Arabic", Tahoma, sans-serif; line-height:1.7; }
+  header { background:var(--ink); color:var(--bone); padding:40px 16px 32px; background-image: linear-gradient(rgba(242,240,235,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(242,240,235,.05) 1px, transparent 1px); background-size: 32px 32px; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 16px; }
+  header .eyebrow { color: var(--ember); font-size: 13px; font-weight: bold; margin: 0; }
+  header h1 { font-size: clamp(30px, 5vw, 52px); margin: 10px 0 8px; line-height: 1.2; }
+  header p { color: rgba(242,240,235,.7); max-width: 760px; margin: 0; font-size: 15px; }
+  .stats { list-style:none; display:flex; flex-wrap:wrap; gap:10px; padding:0; margin:22px 0 0; }
+  .stats li { border:1px solid rgba(242,240,235,.18); padding:6px 14px; font-size:14px; color: rgba(242,240,235,.8); }
+  .stats b { color: var(--ember); font-size:18px; margin-left:4px; }
+  .features { list-style:none; display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:8px 24px; padding:0; margin:22px 0 0; max-width: 980px; }
+  .features li { position:relative; padding-right:18px; font-size:14px; color: rgba(242,240,235,.85); }
+  .features li::before { content:""; position:absolute; right:0; top:.65em; width:8px; height:8px; background: var(--ember); }
+  .tech { display:flex; flex-wrap:wrap; gap:6px; margin-top:22px; }
+  .tech span { background: rgba(242,240,235,.08); color: var(--bone); font-size:12.5px; padding:4px 10px; }
+  .info { display:flex; flex-wrap:wrap; gap:8px 20px; margin-top:18px; font-size:13.5px; color: rgba(242,240,235,.75); }
+  .info b { color: var(--bone); }
+  .ltr { direction: ltr; unicode-bidi: isolate; font-family: Consolas, "Courier New", monospace; }
+  nav.toc { position: sticky; top: 0; z-index: 5; background: rgba(250,249,246,.95); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+  nav.toc .wrap { display:flex; gap:8px; overflow-x:auto; padding-top:10px; padding-bottom:10px; }
+  nav.toc a { white-space:nowrap; border:1px solid var(--line); background:#fff; padding:5px 12px; font-size:13.5px; color:var(--ink); text-decoration:none; }
+  nav.toc a:hover { border-color: var(--ink); }
+  section { padding: 36px 0 8px; scroll-margin-top: 56px; }
+  section > .wrap > .head { border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 18px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-end; gap:8px 16px; }
+  section h2 { margin:0; font-size: 24px; }
+  .hint { margin: 4px 0 0; color: var(--steel); font-size: 14px; max-width: 900px; }
+  .acct { background: var(--ink); color: var(--bone); font-size: 13px; padding: 6px 12px; }
+  ul.grid { list-style:none; margin:0; padding:0; display:grid; gap:18px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  ul.grid.phones { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  .card { background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; min-width:0; }
+  .shot { display:block; width:100%; padding:0; border:0; border-bottom:1px solid var(--line); background: var(--bone); cursor: zoom-in; aspect-ratio: 16 / 10; overflow:hidden; }
+  .phone .shot { aspect-ratio: 9 / 16; }
+  .shot img { width:100%; height:100%; object-fit: cover; object-position: top center; display:block; transition: transform .25s; }
+  .shot:hover img { transform: scale(1.02); }
+  .meta { padding: 10px 12px 12px; display:flex; flex-direction:column; gap:4px; flex:1; }
+  .meta h3 { margin:0; font-size:14.5px; }
+  .note { margin:0; font-size:12.5px; color:var(--steel); }
+  .url { direction: ltr; unicode-bidi: isolate; font-family: Consolas, "Courier New", monospace; font-size:12.5px; color: var(--steel); word-break: break-all; margin-top:auto; align-self:flex-start; }
+  ul.links { list-style:none; margin:18px 0 0; padding:0; border:1px solid var(--line); background:#fff; }
+  .link { display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 16px; padding:10px 14px; border-top:1px solid var(--line); font-size:14px; }
+  .link:first-child { border-top:0; }
+  footer { margin-top: 48px; padding: 24px 16px 40px; color: var(--steel); font-size: 13px; border-top: 1px solid var(--line); }
+  dialog { border:0; padding:0; max-width: min(1200px, 96vw); width: 96vw; max-height: 94vh; background: var(--ink); }
+  dialog::backdrop { background: rgba(12,13,15,.8); }
+  dialog .bar { position: sticky; top:0; display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 14px; background: var(--ink); color: var(--bone); font-size:14px; }
+  dialog button.close { background: var(--ember); color: var(--ink); border:0; padding:6px 14px; font: inherit; font-weight:bold; cursor:pointer; }
+  dialog img { display:block; width:100%; height:auto; }
+  dialog .scroll { overflow:auto; max-height: calc(94vh - 48px); }
+  @media (prefers-reduced-motion: reduce) { .shot img { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="eyebrow">نمونه‌کار · AutoPart</p>
+    <h1>اتوپارت — سامانه یکپارچه توزیع قطعات خودرو</h1>
+    <p>یک پلتفرم کامل برای شرکت پخش قطعات: وب‌سایت عمومی و کاتالوگ، اپلیکیشن موبایل برای ویزیتورهای فروش، میز سفارش و پنل مدیریت، و پنل انبار — کاملاً فارسی و راست‌چین، با مبالغ ریالی و تاریخ شمسی. تصاویر زیر از نسخه واقعی در حال اجرای برنامه گرفته شده‌اند؛ روی هر تصویر بزنید تا صفحه کامل نمایش داده شود.</p>
+    <ul class="stats">
+      <li><b>۴۶</b> صفحه</li>
+      <li><b>۴</b> بخش کاربری</li>
+      <li><b>۵</b> نقش با مجوزهای جداگانه</li>
+      <li><b>۸۹</b> تست خودکار</li>
+    </ul>
+    <ul class="features">
+      <li>موجودی لحظه‌ای با رزرو اتمی، بدون فروش بیش از موجودی</li>
+      <li>گردش کار سفارش از ثبت تا تحویل با تاریخچه وضعیت</li>
+      <li>ثبت قیمت تاریخی هر سفارش و گزارش ممیزی کامل</li>
+      <li>نقش‌ها و مجوزهای قابل تنظیم و امنیت سمت سرور</li>
+      <li>اپلیکیشن قابل نصب (PWA) با پشتیبانی آفلاین</li>
+      <li>گزارش‌های فروش و موجودی با خروجی CSV</li>
+    </ul>
+    <div class="tech">
+      <span class="ltr">Next.js 16</span><span class="ltr">React 19</span><span class="ltr">TypeScript</span><span class="ltr">Tailwind CSS</span><span class="ltr">PostgreSQL</span><span class="ltr">Prisma</span><span class="ltr">PWA</span><span class="ltr">Vitest</span><span class="ltr">Playwright</span>
+    </div>
+  </div>
+</header>
+<nav class="toc" aria-label="بخش‌ها"><div class="wrap">
+  <a href="#site">وب‌سایت عمومی</a>
+  <a href="#visitor">اپلیکیشن موبایل ویزیتور (PWA)</a>
+  <a href="#admin">میز سفارش و پنل مدیریت</a>
+  <a href="#warehouse">پنل انبار</a>
+  <a href="#system">صفحات سیستمی</a>
+</div></nav>
+<main>
+<section id="site"><div class="wrap">
+  <div class="head">
+    <div><h2>وب‌سایت عمومی</h2><p class="hint">کاتالوگ قطعات با جستجو، فیلتر برند و موجودی، مرتب‌سازی و صفحه‌بندی؛ صفحه هر کالا با مشخصات فنی و خودروهای سازگار؛ فرم تماس و ورود همکاران.</p></div>
+    <span class="acct">کاربران: مشتریان و بازدیدکنندگان</span>
+  </div>
+  <ul class="grid"><li class="card">
+      <button class="shot" type="button" data-full="preview/01-site.jpg" data-title="صفحه اصلی" aria-label="نمایش بزرگ صفحه اصلی">
+        <img src="preview/01-site.jpg" alt="صفحه اصلی" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>صفحه اصلی</h3>
+        
+        <span class="url">/</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/02-site.jpg" data-title="کاتالوگ قطعات (جستجو، فیلتر، مرتب‌سازی، صفحه‌بندی)" aria-label="نمایش بزرگ کاتالوگ قطعات (جستجو، فیلتر، مرتب‌سازی، صفحه‌بندی)">
+        <img src="preview/02-site.jpg" alt="کاتالوگ قطعات (جستجو، فیلتر، مرتب‌سازی، صفحه‌بندی)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>کاتالوگ قطعات (جستجو، فیلتر، مرتب‌سازی، صفحه‌بندی)</h3>
+        
+        <span class="url">/products</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/03-site.jpg" data-title="کاتالوگ — نمونه جستجو و فیلتر موجود" aria-label="نمایش بزرگ کاتالوگ — نمونه جستجو و فیلتر موجود">
+        <img src="preview/03-site.jpg" alt="کاتالوگ — نمونه جستجو و فیلتر موجود" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>کاتالوگ — نمونه جستجو و فیلتر موجود</h3>
+        
+        <span class="url">/products?q=لنت&amp;stock=in&amp;sort=price_asc</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/04-site.jpg" data-title="صفحه دسته — قطعات موتور" aria-label="نمایش بزرگ صفحه دسته — قطعات موتور">
+        <img src="preview/04-site.jpg" alt="صفحه دسته — قطعات موتور" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>صفحه دسته — قطعات موتور</h3>
+        
+        <span class="url">/categories/engine</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/05-site.jpg" data-title="جزئیات کالا — دیسک ترمز جلو هواخنک ۲۶۶ میلی‌متر (جفت)" aria-label="نمایش بزرگ جزئیات کالا — دیسک ترمز جلو هواخنک ۲۶۶ میلی‌متر (جفت)">
+        <img src="preview/05-site.jpg" alt="جزئیات کالا — دیسک ترمز جلو هواخنک ۲۶۶ میلی‌متر (جفت)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>جزئیات کالا — دیسک ترمز جلو هواخنک ۲۶۶ میلی‌متر (جفت)</h3>
+        
+        <span class="url">/products/vlx-bd-2841</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/06-site.jpg" data-title="برندها" aria-label="نمایش بزرگ برندها">
+        <img src="preview/06-site.jpg" alt="برندها" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>برندها</h3>
+        
+        <span class="url">/brands</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/07-site.jpg" data-title="جستجو" aria-label="نمایش بزرگ جستجو">
+        <img src="preview/07-site.jpg" alt="جستجو" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>جستجو</h3>
+        
+        <span class="url">/search?q=VLX</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/08-site.jpg" data-title="درباره ما" aria-label="نمایش بزرگ درباره ما">
+        <img src="preview/08-site.jpg" alt="درباره ما" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>درباره ما</h3>
+        
+        <span class="url">/about</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/09-site.jpg" data-title="تماس با ما (فرم پیام)" aria-label="نمایش بزرگ تماس با ما (فرم پیام)">
+        <img src="preview/09-site.jpg" alt="تماس با ما (فرم پیام)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>تماس با ما (فرم پیام)</h3>
+        
+        <span class="url">/contact</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/10-site.jpg" data-title="ورود همکاران (دکمه‌های ورود سریع نمایشی)" aria-label="نمایش بزرگ ورود همکاران (دکمه‌های ورود سریع نمایشی)">
+        <img src="preview/10-site.jpg" alt="ورود همکاران (دکمه‌های ورود سریع نمایشی)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>ورود همکاران (دکمه‌های ورود سریع نمایشی)</h3>
+        
+        <span class="url">/login</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/11-site.jpg" data-title="راهنمای نصب اپلیکیشن ویزیتور (PWA)" aria-label="نمایش بزرگ راهنمای نصب اپلیکیشن ویزیتور (PWA)">
+        <img src="preview/11-site.jpg" alt="راهنمای نصب اپلیکیشن ویزیتور (PWA)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>راهنمای نصب اپلیکیشن ویزیتور (PWA)</h3>
+        
+        <span class="url">/visitor/install</span>
+      </div>
+    </li></ul>
+</div></section>
+<section id="visitor"><div class="wrap">
+  <div class="head">
+    <div><h2>اپلیکیشن موبایل ویزیتور (PWA)</h2><p class="hint">قابل نصب روی اندروید و آیفون. ویزیتور مشتری را انتخاب می‌کند، کالا را با موجودی لحظه‌ای («قابل سفارش تا N عدد») اضافه می‌کند و سفارش را ثبت می‌کند؛ موجودی همان لحظه رزرو می‌شود.</p></div>
+    <span class="acct">کاربران: ویزیتورهای فروش</span>
+  </div>
+  <ul class="grid phones"><li class="card phone">
+      <button class="shot" type="button" data-full="preview/12-visitor.jpg" data-title="داشبورد ویزیتور" aria-label="نمایش بزرگ داشبورد ویزیتور">
+        <img src="preview/12-visitor.jpg" alt="داشبورد ویزیتور" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>داشبورد ویزیتور</h3>
+        
+        <span class="url">/visitor</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/13-visitor.jpg" data-title="ثبت سفارش جدید" aria-label="نمایش بزرگ ثبت سفارش جدید">
+        <img src="preview/13-visitor.jpg" alt="ثبت سفارش جدید" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>ثبت سفارش جدید</h3>
+        <p class="note">کالای VLX-BC-0712 فقط ۲ عدد موجودی دارد — محدودیت «قابل سفارش تا N» را ببینید.</p>
+        <span class="url">/visitor/orders/new</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/14-visitor.jpg" data-title="سفارش‌های من" aria-label="نمایش بزرگ سفارش‌های من">
+        <img src="preview/14-visitor.jpg" alt="سفارش‌های من" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>سفارش‌های من</h3>
+        
+        <span class="url">/visitor/orders</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/15-visitor.jpg" data-title="جزئیات سفارش AP-000053" aria-label="نمایش بزرگ جزئیات سفارش AP-000053">
+        <img src="preview/15-visitor.jpg" alt="جزئیات سفارش AP-000053" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>جزئیات سفارش AP-000053</h3>
+        
+        <span class="url">/visitor/orders/cmv6wddm0000ltoikhgd82clz</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/16-visitor.jpg" data-title="ویرایش پیش‌نویس AP-000052" aria-label="نمایش بزرگ ویرایش پیش‌نویس AP-000052">
+        <img src="preview/16-visitor.jpg" alt="ویرایش پیش‌نویس AP-000052" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>ویرایش پیش‌نویس AP-000052</h3>
+        
+        <span class="url">/visitor/orders/cmv6w5ttd0275tov4kii3kgt8/edit</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/17-visitor.jpg" data-title="مشتریان من" aria-label="نمایش بزرگ مشتریان من">
+        <img src="preview/17-visitor.jpg" alt="مشتریان من" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>مشتریان من</h3>
+        
+        <span class="url">/visitor/customers</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/18-visitor.jpg" data-title="افزودن مشتری جدید" aria-label="نمایش بزرگ افزودن مشتری جدید">
+        <img src="preview/18-visitor.jpg" alt="افزودن مشتری جدید" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>افزودن مشتری جدید</h3>
+        
+        <span class="url">/visitor/customers/new</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/19-visitor.jpg" data-title="پرونده مشتری — اتو سرویس شمال تهران" aria-label="نمایش بزرگ پرونده مشتری — اتو سرویس شمال تهران">
+        <img src="preview/19-visitor.jpg" alt="پرونده مشتری — اتو سرویس شمال تهران" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>پرونده مشتری — اتو سرویس شمال تهران</h3>
+        
+        <span class="url">/visitor/customers/cmv6w5eru00d5tov495nc6q6d</span>
+      </div>
+    </li>
+<li class="card phone">
+      <button class="shot" type="button" data-full="preview/20-visitor.jpg" data-title="کاتالوگ با موجودی قابل سفارش" aria-label="نمایش بزرگ کاتالوگ با موجودی قابل سفارش">
+        <img src="preview/20-visitor.jpg" alt="کاتالوگ با موجودی قابل سفارش" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>کاتالوگ با موجودی قابل سفارش</h3>
+        
+        <span class="url">/visitor/catalogue</span>
+      </div>
+    </li></ul>
+</div></section>
+<section id="admin"><div class="wrap">
+  <div class="head">
+    <div><h2>میز سفارش و پنل مدیریت</h2><p class="hint">بررسی، اصلاح قیمت و تعداد، تأیید یا رد سفارش‌ها؛ مدیریت کالا، قیمت، تصویر و موجودی با تاریخچه گردش؛ مشتریان و تخصیص ویزیتور؛ کاربران، نقش‌ها و مجوزها؛ گزارش‌ها با خروجی CSV و گزارش ممیزی.</p></div>
+    <span class="acct">کاربران: مدیر فروش و مدیر سیستم</span>
+  </div>
+  <ul class="grid"><li class="card">
+      <button class="shot" type="button" data-full="preview/21-admin.jpg" data-title="داشبورد مدیریت" aria-label="نمایش بزرگ داشبورد مدیریت">
+        <img src="preview/21-admin.jpg" alt="داشبورد مدیریت" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>داشبورد مدیریت</h3>
+        
+        <span class="url">/admin</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/22-admin.jpg" data-title="سفارش‌ها (فیلتر وضعیت، دوره، جستجو)" aria-label="نمایش بزرگ سفارش‌ها (فیلتر وضعیت، دوره، جستجو)">
+        <img src="preview/22-admin.jpg" alt="سفارش‌ها (فیلتر وضعیت، دوره، جستجو)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>سفارش‌ها (فیلتر وضعیت، دوره، جستجو)</h3>
+        
+        <span class="url">/admin/orders</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/23-admin.jpg" data-title="بررسی سفارش AP-000045 (اصلاح اقلام، تأیید/رد، یادداشت، تحویل)" aria-label="نمایش بزرگ بررسی سفارش AP-000045 (اصلاح اقلام، تأیید/رد، یادداشت، تحویل)">
+        <img src="preview/23-admin.jpg" alt="بررسی سفارش AP-000045 (اصلاح اقلام، تأیید/رد، یادداشت، تحویل)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>بررسی سفارش AP-000045 (اصلاح اقلام، تأیید/رد، یادداشت، تحویل)</h3>
+        
+        <span class="url">/admin/orders/cmv6w5ta7023ztov4e8wqeevx</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/24-admin.jpg" data-title="کالاها" aria-label="نمایش بزرگ کالاها">
+        <img src="preview/24-admin.jpg" alt="کالاها" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>کالاها</h3>
+        
+        <span class="url">/admin/products</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/25-admin.jpg" data-title="افزودن کالا" aria-label="نمایش بزرگ افزودن کالا">
+        <img src="preview/25-admin.jpg" alt="افزودن کالا" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>افزودن کالا</h3>
+        
+        <span class="url">/admin/products/new</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/26-admin.jpg" data-title="ویرایش کالا ARD-AL-3150 (قیمت، تصاویر، بایگانی)" aria-label="نمایش بزرگ ویرایش کالا ARD-AL-3150 (قیمت، تصاویر، بایگانی)">
+        <img src="preview/26-admin.jpg" alt="ویرایش کالا ARD-AL-3150 (قیمت، تصاویر، بایگانی)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>ویرایش کالا ARD-AL-3150 (قیمت، تصاویر، بایگانی)</h3>
+        
+        <span class="url">/admin/products/cmv6w5eop00bytov41qz3jg09</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/27-admin.jpg" data-title="دسته‌بندی‌ها" aria-label="نمایش بزرگ دسته‌بندی‌ها">
+        <img src="preview/27-admin.jpg" alt="دسته‌بندی‌ها" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>دسته‌بندی‌ها</h3>
+        
+        <span class="url">/admin/categories</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/28-admin.jpg" data-title="برندها" aria-label="نمایش بزرگ برندها">
+        <img src="preview/28-admin.jpg" alt="برندها" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>برندها</h3>
+        
+        <span class="url">/admin/brands</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/29-admin.jpg" data-title="موجودی انبار (اصلاح موجودی)" aria-label="نمایش بزرگ موجودی انبار (اصلاح موجودی)">
+        <img src="preview/29-admin.jpg" alt="موجودی انبار (اصلاح موجودی)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>موجودی انبار (اصلاح موجودی)</h3>
+        
+        <span class="url">/admin/inventory</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/30-admin.jpg" data-title="تاریخچه گردش کالا" aria-label="نمایش بزرگ تاریخچه گردش کالا">
+        <img src="preview/30-admin.jpg" alt="تاریخچه گردش کالا" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>تاریخچه گردش کالا</h3>
+        
+        <span class="url">/admin/inventory/movements</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/31-admin.jpg" data-title="مشتریان" aria-label="نمایش بزرگ مشتریان">
+        <img src="preview/31-admin.jpg" alt="مشتریان" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>مشتریان</h3>
+        
+        <span class="url">/admin/customers</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/32-admin.jpg" data-title="افزودن مشتری" aria-label="نمایش بزرگ افزودن مشتری">
+        <img src="preview/32-admin.jpg" alt="افزودن مشتری" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>افزودن مشتری</h3>
+        
+        <span class="url">/admin/customers/new</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/33-admin.jpg" data-title="پرونده مشتری — تعمیرگاه مرکزی پارس (تخصیص ویزیتور)" aria-label="نمایش بزرگ پرونده مشتری — تعمیرگاه مرکزی پارس (تخصیص ویزیتور)">
+        <img src="preview/33-admin.jpg" alt="پرونده مشتری — تعمیرگاه مرکزی پارس (تخصیص ویزیتور)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>پرونده مشتری — تعمیرگاه مرکزی پارس (تخصیص ویزیتور)</h3>
+        
+        <span class="url">/admin/customers/cmv6w5eqv00d3tov4jkqhxzhc</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/34-admin.jpg" data-title="گزارش‌ها" aria-label="نمایش بزرگ گزارش‌ها">
+        <img src="preview/34-admin.jpg" alt="گزارش‌ها" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>گزارش‌ها</h3>
+        
+        <span class="url">/admin/reports</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/35-admin.jpg" data-title="گزارش ممیزی" aria-label="نمایش بزرگ گزارش ممیزی">
+        <img src="preview/35-admin.jpg" alt="گزارش ممیزی" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>گزارش ممیزی</h3>
+        
+        <span class="url">/admin/audit</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/36-admin.jpg" data-title="پیام‌های وب‌سایت" aria-label="نمایش بزرگ پیام‌های وب‌سایت">
+        <img src="preview/36-admin.jpg" alt="پیام‌های وب‌سایت" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>پیام‌های وب‌سایت</h3>
+        
+        <span class="url">/admin/inquiries</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/37-admin.jpg" data-title="کاربران (فقط مدیر سیستم)" aria-label="نمایش بزرگ کاربران (فقط مدیر سیستم)">
+        <img src="preview/37-admin.jpg" alt="کاربران (فقط مدیر سیستم)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>کاربران (فقط مدیر سیستم)</h3>
+        
+        <span class="url">/admin/users</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/38-admin.jpg" data-title="افزودن کاربر (فقط مدیر سیستم)" aria-label="نمایش بزرگ افزودن کاربر (فقط مدیر سیستم)">
+        <img src="preview/38-admin.jpg" alt="افزودن کاربر (فقط مدیر سیستم)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>افزودن کاربر (فقط مدیر سیستم)</h3>
+        
+        <span class="url">/admin/users/new</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/39-admin.jpg" data-title="ویرایش کاربر — رضا کریمی (فقط مدیر سیستم)" aria-label="نمایش بزرگ ویرایش کاربر — رضا کریمی (فقط مدیر سیستم)">
+        <img src="preview/39-admin.jpg" alt="ویرایش کاربر — رضا کریمی (فقط مدیر سیستم)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>ویرایش کاربر — رضا کریمی (فقط مدیر سیستم)</h3>
+        
+        <span class="url">/admin/users/cmv6w5dcl000atov4joorlj5r</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/40-admin.jpg" data-title="نقش‌ها و مجوزها (فقط مدیر سیستم)" aria-label="نمایش بزرگ نقش‌ها و مجوزها (فقط مدیر سیستم)">
+        <img src="preview/40-admin.jpg" alt="نقش‌ها و مجوزها (فقط مدیر سیستم)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>نقش‌ها و مجوزها (فقط مدیر سیستم)</h3>
+        
+        <span class="url">/admin/roles</span>
+      </div>
+    </li></ul>
+</div></section>
+<section id="warehouse"><div class="wrap">
+  <div class="head">
+    <div><h2>پنل انبار</h2><p class="hint">صف آماده‌سازی، فهرست جمع‌آوری مرتب‌شده بر اساس قفسه، علامت‌گذاری اقلام، تأیید ارسال و تحویل؛ کسر خودکار موجودی فقط یک‌بار و هنگام ارسال.</p></div>
+    <span class="acct">کاربران: انباردار و سرپرست انبار</span>
+  </div>
+  <ul class="grid"><li class="card">
+      <button class="shot" type="button" data-full="preview/41-warehouse.jpg" data-title="صف کار انبار" aria-label="نمایش بزرگ صف کار انبار">
+        <img src="preview/41-warehouse.jpg" alt="صف کار انبار" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>صف کار انبار</h3>
+        
+        <span class="url">/warehouse</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/42-warehouse.jpg" data-title="سفارش‌های آماده‌سازی و ارسال" aria-label="نمایش بزرگ سفارش‌های آماده‌سازی و ارسال">
+        <img src="preview/42-warehouse.jpg" alt="سفارش‌های آماده‌سازی و ارسال" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>سفارش‌های آماده‌سازی و ارسال</h3>
+        
+        <span class="url">/warehouse/orders</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/43-warehouse.jpg" data-title="فهرست جمع‌آوری AP-000038 (جمع‌آوری، آماده، ارسال، تحویل)" aria-label="نمایش بزرگ فهرست جمع‌آوری AP-000038 (جمع‌آوری، آماده، ارسال، تحویل)">
+        <img src="preview/43-warehouse.jpg" alt="فهرست جمع‌آوری AP-000038 (جمع‌آوری، آماده، ارسال، تحویل)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>فهرست جمع‌آوری AP-000038 (جمع‌آوری، آماده، ارسال، تحویل)</h3>
+        
+        <span class="url">/warehouse/orders/cmv6w5s1i01ybtov454xsktwc</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/44-warehouse.jpg" data-title="موجودی انبار" aria-label="نمایش بزرگ موجودی انبار">
+        <img src="preview/44-warehouse.jpg" alt="موجودی انبار" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>موجودی انبار</h3>
+        
+        <span class="url">/warehouse/inventory</span>
+      </div>
+    </li></ul>
+</div></section>
+<section id="system"><div class="wrap">
+  <div class="head">
+    <div><h2>صفحات سیستمی</h2><p class="hint">صفحه خطای ۴۰۴ و صفحه آفلاین اپلیکیشن.</p></div>
+    
+  </div>
+  <ul class="grid"><li class="card">
+      <button class="shot" type="button" data-full="preview/45-system.jpg" data-title="صفحه ۴۰۴ (یافت نشد)" aria-label="نمایش بزرگ صفحه ۴۰۴ (یافت نشد)">
+        <img src="preview/45-system.jpg" alt="صفحه ۴۰۴ (یافت نشد)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>صفحه ۴۰۴ (یافت نشد)</h3>
+        
+        <span class="url">/this-page-does-not-exist</span>
+      </div>
+    </li>
+<li class="card">
+      <button class="shot" type="button" data-full="preview/46-system.jpg" data-title="صفحه آفلاین (PWA)" aria-label="نمایش بزرگ صفحه آفلاین (PWA)">
+        <img src="preview/46-system.jpg" alt="صفحه آفلاین (PWA)" loading="lazy">
+      </button>
+      <div class="meta">
+        <h3>صفحه آفلاین (PWA)</h3>
+        
+        <span class="url">/offline</span>
+      </div>
+    </li></ul>
+</div></section>
+</main>
+<footer><div class="wrap">اتوپارت · نمونه‌کار — داده‌ها و برندهای نمایش‌داده‌شده نمایشی هستند. تصاویر از نسخه در حال اجرای برنامه گرفته شده‌اند (۲۵ مهر ۱۴۰۵ ساعت ۱۲:۲۵).</div></footer>
+<dialog id="viewer">
+  <div class="bar"><span id="viewer-title"></span><button class="close" type="button" id="viewer-close">بستن ✕</button></div>
+  <div class="scroll"><img id="viewer-img" alt=""></div>
+</dialog>
+<script>
+  const viewer = document.getElementById("viewer");
+  const img = document.getElementById("viewer-img");
+  document.addEventListener("click", (e) => {
+    const shot = e.target.closest(".shot");
+    if (shot) {
+      img.src = shot.dataset.full;
+      img.alt = shot.dataset.title;
+      document.getElementById("viewer-title").textContent = shot.dataset.title;
+      viewer.showModal();
+      viewer.querySelector(".scroll").scrollTop = 0;
+    }
+  });
+  document.getElementById("viewer-close").addEventListener("click", () => viewer.close());
+  viewer.addEventListener("click", (e) => { if (e.target === viewer) viewer.close(); });
+</script>
+</body>
+</html>
